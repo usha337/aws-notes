@@ -1,16 +1,80 @@
 type of clouds:
+ public , private 
+
+list of aws services by catagoery:
+
+   https://bytebytego.com/guides/aws-services-evolution/
+
 Type of instances:
    reserved instance, ondemand and spot 
+
+List of compute services:
+  ec2, lambda, ecs, eks, elastic bean stalk 
+
 Type of storage services:
 ebs, efs, s3 
+
 Type of Loadbalancers:
- classic , application and network 
+ classic , application and network , gateway loadbalancer 
+
 Type of Databases:
    RDS, Aurora postgres, DynamoDB, DocumentDB, Graph Databases and timeseries databases 
+
+reader
+writer 
+replciation 
+backups - PITR - 35 days 
+no of actice actions 
+
 TYpe of Autoscaling:
-   Periodic autoscaling, applicatoin autoscaling 
+   autocaling on metrics system performance, Periodic autoscaling, applicatoin autoscaling 
+    vertical scaling 
+   horizontal scaling
+
 Type of Queuing systmes:
-  sqs, sns, eventbridge 
+  sqs, 
+Type of notification service:
+sns - it can be chat, message, phone call 
+
+Type of email service:
+ses - simple email service - 25 - smtp
+
+Type of event driven service:
+eventbridge 
+
+Neworking:
+vpc
+vpc peering - communication between the two vpcs 
+vpcendpoints 
+NACLS - network access control list 
+prefix list 
+security group 
+route table 
+NAT gateway
+internet gateway 
+ENI - elastic network interface 
+
+trasnitgateway 
+direct connect 
+site-to-site 
+
+DNS:
+
+route53 
+hostedzone 
+records 
+routing policies 
+resolver rules 
+
+
+logs:
+cloudwatch 
+cloudtrail 
+vpcflow logs
+DNS logs 
+
+
+
 
 
 Application Arch types:
@@ -21,6 +85,75 @@ Event Driven
 Serverless 
 
 
+
+amazonlinux2 & linux23 - ec2-user - yum
+ubuntu - ubuntu - apt-get
+centos - centos - yum 
+debian -        - apt
+rhel -          - yum 
+fedora -        - apt
+alpine -        - apk 
+
+
+id
+env
+dig
+telnet 
+traceroute
+ping
+nslookup 
+netstat -tunlp
+uname -a
+curl 
+wget 
+sed
+vmstat
+df -hk
+free -m 
+free -g
+nproc
+ps -ef 
+ps aux
+htop
+top
+kill pid 
+kill -9 pid 
+head 
+tail 
+cat 
+tac
+history 
+cd ~ - to go home directory 
+umask 
+nslookp
+pwd
+cd ..
+cd /
+mv
+useradd
+adduser
+addgroup
+chmod
+chown
+touch 
+mv 
+cp 
+rsync 
+scp 
+rm 
+rm -rf 
+whoami
+w
+who
+users
+getent
+how to see list of users in linux 
+how to see list of groups in linux 
+
+
+what is kernal 
+what are profiles in linux - bash, .zsh, 
+how to set envirnemnt variables in linux ?
 
 
 
