@@ -8,7 +8,7 @@ Type of Loadbalancers:
 Type of Databases:
    RDS, Aurora postgres, DynamoDB, DocumentDB, Graph Databases and timeseries databases 
 TYpe of Autoscaling:
-   Periodic autoscaling 
+   Periodic autoscaling, applicatoin autoscaling 
 Type of Queuing systmes:
   sqs, sns, eventbridge 
 
