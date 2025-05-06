@@ -1,0 +1,26 @@
+type of clouds:
+Type of instances:
+   reserved instance, ondemand and spot 
+Type of storage services:
+ebs, efs, s3 
+Type of Loadbalancers:
+ classic , application and network 
+Type of Databases:
+   RDS, Aurora postgres, DynamoDB, DocumentDB, Graph Databases and timeseries databases 
+TYpe of Autoscaling:
+   Periodic autoscaling 
+Type of Queuing systmes:
+  sqs, sns, eventbridge 
+
+
+Application Arch types:
+
+Monolithic 
+Microservices 
+Event Driven 
+Serverless 
+
+
+
+
+
