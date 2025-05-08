@@ -36,11 +36,13 @@ Type of Queuing systmes:
 Type of notification service:
 sns - it can be chat, message, phone call 
 
+
 Type of email service:
 ses - simple email service - 25 - smtp
 
 Type of event driven service:
 eventbridge 
+aws stepfunctions
 
 Neworking:
 vpc
@@ -73,8 +75,29 @@ cloudtrail
 vpcflow logs
 DNS logs 
 
+Encryption :
+KMS
 
+Content delivery network CDN:
+cloud front
 
+API Gatewway
+
+WAF
+datalake
+
+AWS Crtificate manager
+ssl certificates
+
+networking 
+0si model
+tcp
+udp
+protocols
+
+infrastructure provisoning using cloudformation
+
+AWS control tower---account factory 
 
 
 Application Arch types:
@@ -154,6 +177,44 @@ how to see list of groups in linux
 what is kernal 
 what are profiles in linux - bash, .zsh, 
 how to set envirnemnt variables in linux ?
+
+vpc endpoints: if one aws services wants to communicate to other aws service within same vpc
+private link
+vpc endpoints 2 types
+1. interface endpoint -- remaining all services interface endpoints
+2. gateway endpoint --- s3,dynamodb
+
+vpc peering : limit is 5
+there is no way to tracking so advance version for it is aws transit gateway
+
+STNO will use transit gateway
+
+event bridge
+sns 
+sqs
+stepfunctions'
+lambda
+
+
+learn complete vpc peering networking concepts
+
+cloud watch will do basic monitoring like infratruture monitoring and application monitoring
+cloud trail will api actions 
+
+AWS direct connect
+Transit gateway
+
+k8 deploymnet stratgeies
+which deployment and when to use
+coredns in k8
+cni plugin'
+ingress resource
+k8 what is crd
+webhook in k8
+and mutating webhook
+cluster role and role binding
+service register and service discovery
+
 
 
 
