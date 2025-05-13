@@ -1,0 +1,799 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This is a sample, non-production-ready template that describes a Virtual Private Cloud (VPC).  Based on user input, the following subnets, distributed across 3 Availability Zones (AZs), 3 Private subnets, 3 Public subnets. No IGW and option to AutoAttach to mentioned TGW (c) 2016 Amazon Web Services, Inc. or its affiliates. All Rights Reserved. This AWS Content is provided subject to the terms of the AWS Customer Agreement available at http://aws.amazon.com/agreement or other written agreement between Customer and Amazon Web Services, Inc.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Global Parameters
+        Parameters:
+          - VpcCidr
+          - EnableDnsSupport
+          - EnableDnsHostnames
+      - Label:
+          default: Public Subnet Layout
+        Parameters:
+          - PublicSubnet1Cidr
+          - PublicSubnet2Cidr
+          - PublicSubnet3Cidr
+      - Label:
+          default: Private Subnet Layout
+        Parameters:
+          - PrivateSubnet1Cidr
+          - PrivateSubnet2Cidr
+          - PrivateSubnet3Cidr
+      - Label:
+          default: Tags set up
+        Parameters:
+          - ApplicationNameTag
+          - EnvironmentNameTag
+          - LineOfBusinessTag
+          - OwnerTag
+    ParameterLabels:
+      ApplicationNameTag:
+        default: Which value do you wish to specify for the ApplicationName tag without vpc in the name?
+      EnableDnsHostnames:
+        default: Enable DNS hostnames?
+      EnableDnsSupport:
+        default: Enable DNS support?
+      EnvironmentNameTag:
+        default: Which value do you wish to specify for the EnvironmentName tag?
+      LineOfBusinessTag:
+        default: Which value do you wish to specify for the LineOfBusinessTag tag?
+      OwnerTag:
+        default: Which value do you wish to specify for the Owner tag?
+      PublicSubnet1Cidr:
+        default: CIDR block for the Public subnet 1 in AZ 1.
+      PublicSubnet2Cidr:
+        default: CIDR block for the Public subnet 2 in AZ 2.
+      PublicSubnet3Cidr:
+        default: CIDR block for the Public subnet 3 in AZ 3.
+      PrivateSubnet1Cidr:
+        default: CIDR block for the Private subnet 1 in AZ 1.
+      PrivateSubnet2Cidr:
+        default: CIDR block for the Private subnet 2 in AZ 2.
+      PrivateSubnet3Cidr:
+        default: CIDR block for the Private subnet 3 in AZ 3.
+      VpcCidr:
+        default: Which CIDR block would you like to use for the VPC?
+Parameters:
+  ApplicationNameTag:
+    Default: sample-app
+    Description: Application tag to attach to resources described by this template without vpc in the name
+    Type: String
+  EnableDnsHostnames:
+    AllowedValues:
+      - 'no'
+      - 'yes'
+    ConstraintDescription: must be a valid selection.
+    Default: 'yes'
+    Description: Whether to enable DNS hostnames.  You need to enable DNS support if you want to use DNS hostnames.
+    Type: String
+  EnableDnsSupport:
+    AllowedValues:
+      - 'no'
+      - 'yes'
+    ConstraintDescription: must be a valid selection.
+    Default: 'yes'
+    Description: Whether to enable DNS support.
+    Type: String
+  AssociateR53DNSRuleAssociationAWS:
+    AllowedValues:
+      - 'no'
+      - 'yes'
+    ConstraintDescription: must be a valid selection.
+    Default: 'no'
+    Description: Whether to conect to R53 Resolver to AWS domain.
+    Type: String
+  AssociateR53DNSRuleAssociationOnPrem:
+    AllowedValues:
+      - 'no'
+      - 'yes'
+    ConstraintDescription: must be a valid selection.
+    Default: 'no'
+    Description: Whether to conect to R53 Resolver to AWS domain.
+    Type: String
+  EnableVPCFlowLogs:
+    AllowedValues:
+      - 'no'
+      - 'yes'
+    ConstraintDescription: must be a valid selection.
+    Default: 'yes'
+    Description: Whether to enable VPC flow Logs to s3 bucket
+    Type: String
+  EnableSSMEndpoints:
+    AllowedValues:
+      - 'no'
+      - 'yes'
+    ConstraintDescription: must be a valid selection.
+    Default: 'yes'
+    Description: Whether to enable SSM,SSM-Messages and ec2-Messages Endpoints
+    Type: String
+  EnvironmentNameTag:
+    AllowedValues:
+      - nonprod
+      - dev
+    ConstraintDescription: must be a valid environment name.
+    Default: nonprod
+    Description: Environment tag to attach to resources described by this template.
+    Type: String
+  LineOfBusinessTag:
+    Default: sample-line-of-business
+    Description: LineOfBusiness tag to attach to resources described by this template.
+    Type: String
+  OwnerTag:
+    Default: sample-owner
+    Description: Owner tag to attach to resources described by this template.
+    Type: String
+  VpcCidr:
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '9'
+    Type: String
+    Default: 10.209.0.0/22
+  PrivateSubnet1Cidr:
+    AllowedPattern: ((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2}))*
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '0'
+    Type: String
+    Default: 10.209.1.0/24
+  PrivateSubnet2Cidr:
+    AllowedPattern: ((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2}))*
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '0'
+    Type: String
+    Default: 10.209.2.0/24
+  PrivateSubnet3Cidr:
+    AllowedPattern: ((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2}))*
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '0'
+    Type: String
+    Default: 10.209.3.0/24
+  PublicSubnet1Cidr:
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '9'
+    Type: String
+    Default: 10.209.0.0/26
+  PublicSubnet2Cidr:
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '9'
+    Type: String
+    Default: 10.209.0.64/26
+  PublicSubnet3Cidr:
+    AllowedPattern: ((\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2}))*
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: CIDR block of the form x.x.x.x/x to assign to the subnet.
+    MaxLength: '18'
+    MinLength: '0'
+    Type: String
+    Default: 10.0.0.0/24
+  ACL:
+    Type: String
+    Description: Default value is Private, Would you like to apply a canned access control list to grant predefined permissions?
+    AllowedValues:
+      - Private
+      - PublicRead
+      - PublicReadWrite
+      - AwsExecRead
+      - AuthenticatedRead
+      - BucketOwnerRead
+      - BucketOwnerFullControl
+      - LogDeliveryWrite
+      - None
+    Default: Private
+Conditions:
+  EnableVPCFlowLogs: !Equals
+    - !Ref EnableVPCFlowLogs
+    - 'yes'
+  SetEnableDnsHostnames: !Equals
+    - !Ref EnableDnsHostnames
+    - 'yes'
+  SetEnableDnsSupport: !Equals
+    - !Ref EnableDnsSupport
+    - 'yes'
+  SetAssociateR53DNSRuleAssociationAWS: !Equals
+    - !Ref AssociateR53DNSRuleAssociationAWS
+    - 'yes'
+  SetAssociateR53DNSRuleAssociationOnPrem: !Equals
+    - !Ref AssociateR53DNSRuleAssociationOnPrem
+    - 'yes'
+  DeploySSMEndpoints: !Equals
+    - !Ref EnableSSMEndpoints
+    - 'yes'
+  hasACL: !Not
+    - !Equals
+      - !Ref ACL
+      - None
+Resources:
+  PublicRouteTable1:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PublicRouteTable1
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::RouteTable
+  PublicRouteTable2:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PublicRouteTable2
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::RouteTable
+  PublicRouteTable3:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PublicRouteTable3
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::RouteTable
+  PublicSubnet1:
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnet1Cidr
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PublicSubnet1
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::Subnet
+  PublicSubnet1RouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      SubnetId: !Ref PublicSubnet1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PublicSubnet2:
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnet2Cidr
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PublicSubnet2
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::Subnet
+  PublicSubnet2RouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      SubnetId: !Ref PublicSubnet2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PublicSubnet3:
+    Properties:
+      AvailabilityZone: !Select
+        - '2'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnet3Cidr
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PublicSubnet3
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::Subnet
+  PublicSubnet3RouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref PublicRouteTable3
+      SubnetId: !Ref PublicSubnet3
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PrivateRouteTable1:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PrivateRouteTable1
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::RouteTable
+  PrivateRouteTable2:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PrivateRouteTable2
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::RouteTable
+  PrivateRouteTable3:
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PrivateRouteTable3
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::RouteTable
+  PrivateSubnet1:
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnet1Cidr
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PrivateSubnet1
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+        - Key: Private
+          Value: ''
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::Subnet
+  PrivateSubnet1RouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PrivateSubnet2:
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnet2Cidr
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PrivateSubnet2
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+        - Key: Private
+          Value: ''
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::Subnet
+  PrivateSubnet2RouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PrivateSubnet3:
+    Properties:
+      AvailabilityZone: !Select
+        - '2'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnet3Cidr
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - PrivateSubnet3
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+        - Key: Private
+          Value: ''
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::Subnet
+  PrivateSubnet3RouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet3
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  Vpc:
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: !If
+        - SetEnableDnsHostnames
+        - true
+        - false
+      EnableDnsSupport: !If
+        - SetEnableDnsSupport
+        - true
+        - false
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ApplicationNameTag
+              - !Ref EnvironmentNameTag
+              - VPC
+        - Key: LineOfBusiness
+          Value: !Ref LineOfBusinessTag
+        - Key: Owner
+          Value: !Ref OwnerTag
+        - Key: Application
+          Value: !Ref ApplicationNameTag
+        - Key: Environment
+          Value: !Ref EnvironmentNameTag
+    Type: AWS::EC2::VPC
+  ThirdVpcCloudWatch:
+    Condition: EnableVPCFlowLogs
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub ${AWS::AccountId}-${AWS::Region}-${EnvironmentNameTag}-thirdvpc-flowlogs
+      RetentionInDays: 7
+  FlowLogRolethirdvpc:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - vpc-flow-logs.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+  RolePolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: root
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+            Resource: '*'
+      Roles:
+        - !Ref FlowLogRolethirdvpc
+  FlowLogs:
+    Condition: EnableVPCFlowLogs
+    Type: AWS::EC2::FlowLog
+    DependsOn: ThirdVpcCloudWatch
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt FlowLogRolethirdvpc.Arn
+      LogGroupName: !Ref ThirdVpcCloudWatch
+      ResourceId: !Ref Vpc
+      ResourceType: VPC
+      TrafficType: ALL
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: !If
+        - hasACL
+        - !Ref ACL
+        - !Ref AWS::NoValue
+      BucketName: !Sub thirdvpcflowlogs-${ApplicationNameTag}-${EnvironmentNameTag}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  VPCFlowLogsS3:
+    Condition: EnableVPCFlowLogs
+    Type: AWS::EC2::FlowLog
+    Properties:
+      LogDestination: !Sub ${Bucket.Arn}/
+      LogDestinationType: s3
+      ResourceId: !Ref Vpc
+      ResourceType: VPC
+      TrafficType: ALL
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: '*'
+            Effect: Allow
+            Resource: '*'
+            Principal: '*'
+      RouteTableIds:
+        - !Ref PrivateRouteTable1
+        - !Ref PrivateRouteTable2
+        - !Ref PrivateRouteTable3
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref AWS::Region
+          - .s3
+      VpcId: !Ref Vpc
+  DynamoDBEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: '*'
+            Effect: Allow
+            Resource: '*'
+            Principal: '*'
+      RouteTableIds:
+        - !Ref PrivateRouteTable1
+        - !Ref PrivateRouteTable2
+        - !Ref PrivateRouteTable3
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref AWS::Region
+          - .dynamodb
+      VpcId: !Ref Vpc
+  SSMSecurityGroup:
+    Condition: DeploySSMEndpoints
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: session manager connectivity
+      GroupName: session_manager_443
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: session_manager_443
+        - Key: FirewallManagerException
+          Value: 'True'
+  SessionmanagerIngress443:
+    Condition: DeploySSMEndpoints
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: !Ref VpcCidr
+      GroupId: !GetAtt SSMSecurityGroup.GroupId
+  LogsVPCESecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Logs Endpoint Connectivity
+      GroupName: Logs_Endpoint_443
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: Logs_Enpoint_443
+        - Key: FirewallManagerException
+          Value: 'True'
+  LogsVPCESGIngress443:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: !Ref VpcCidr
+      GroupId: !GetAtt LogsVPCESecurityGroup.GroupId
+  LogsVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref AWS::Region
+          - .logs
+      SecurityGroupIds:
+        - !GetAtt LogsVPCESecurityGroup.GroupId
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
+      VpcId: !Ref Vpc
+  SSMEndpoint:
+    Condition: DeploySSMEndpoints
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref AWS::Region
+          - .ssm
+      SecurityGroupIds:
+        - !GetAtt SSMSecurityGroup.GroupId
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
+      VpcId: !Ref Vpc
+  SSMMessagesEndpoint:
+    Condition: DeploySSMEndpoints
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref AWS::Region
+          - .ssmmessages
+      SecurityGroupIds:
+        - !GetAtt SSMSecurityGroup.GroupId
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
+      VpcId: !Ref Vpc
+  Ec2MessagesEndpoint:
+    Condition: DeploySSMEndpoints
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref AWS::Region
+          - .ec2messages
+      SecurityGroupIds:
+        - !GetAtt SSMSecurityGroup.GroupId
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
+      VpcId: !Ref Vpc
+Outputs:
+  PublicRouteTable1Id:
+    Description: Route table ID.
+    Value: !Ref PublicRouteTable1
+  PublicRouteTable2Id:
+    Description: Route table ID.
+    Value: !Ref PublicRouteTable2
+  PublicRouteTable3Id:
+    Description: Route table ID.
+    Value: !Ref PublicRouteTable3
+  PublicSubnet1Id:
+    Description: Subnet ID.
+    Value: !Ref PublicSubnet1
+  PublicSubnet2Id:
+    Description: Subnet ID.
+    Value: !Ref PublicSubnet2
+  PublicSubnet3Id:
+    Description: Subnet ID.
+    Value: !Ref PublicSubnet3
+  PrivateRouteTable1Id:
+    Description: Route table ID.
+    Value: !Ref PrivateRouteTable1
+  PrivateRouteTable2Id:
+    Description: Route table ID.
+    Value: !Ref PrivateRouteTable2
+  PrivateRouteTable3Id:
+    Description: Route table ID.
+    Value: !Ref PrivateRouteTable3
+  PrivateSubnet1Id:
+    Description: Subnet ID.
+    Value: !Ref PrivateSubnet1
+  PrivateSubnet2Id:
+    Description: Subnet ID.
+    Value: !Ref PrivateSubnet2
+  PrivateSubnet3Id:
+    Description: Subnet ID.
+    Value: !Ref PrivateSubnet3
+  VpcId:
+    Description: VPC ID
+    Value: !Ref Vpc
