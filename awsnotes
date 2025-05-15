@@ -117,6 +117,12 @@ rhel -          - yum
 fedora -        - apt
 alpine -        - apk 
 
+Linux protocals:
+
+smtp
+ftp
+ssh
+
 
 id
 env
@@ -214,6 +220,27 @@ webhook in k8
 and mutating webhook
 cluster role and role binding
 service register and service discovery
+
+
+Logging:
+
+ELK, Splunk, Logz.io, cloudwatch 
+
+Monitorng:
+
+Dynatrace , Datadog , Cloudawatch
+
+Agent to ship the logs:
+
+dyntrace - one agent 
+ELK - heartbeat 
+cloudwatch - cloudwatch agent 
+
+CNCF log shippers - fluent bit, fluentd 
+
+
+
+
 
 
 
